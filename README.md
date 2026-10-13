@@ -18,7 +18,7 @@ Package code and its narrow distribution materials retain the previously approve
 
 GitHub repository: `leonardotalesdev/leonardo-tales-policy-engine`; default branch: `main`.
 
-## Controlled action profile surface (unreleased local work)
+## Controlled action profile surface (unreleased v0.2.0 release candidate)
 
 A second, independent API, `evaluateActionPolicy()`, evaluates exactly three named profiles under the exported `ACTION_PROFILE_VERSION = 'tales-actions-v1'` contract. It never routes or changes `evaluatePolicy()`. The generic v0.1 evaluator still blocks production, deployment, secrets, external integrations, real user data, high-stakes data and restricted-tier requests even when `humanApprovalPresent=true`.
 
@@ -32,4 +32,4 @@ All profiles require production context, enabled runtime, an authorized target, 
 
 **This is pure evaluation, not a runtime integration or permission grant.** The caller must establish trusted facts and separately enforce authentication, exact approval verification, OAuth, managed credentials, idempotency, state transitions, execution and audit persistence. Model/visitor assertions are not trusted policy facts. Managed executor credentials stay outside the policy payload and are not read by this package.
 
-See the [package contract and examples](packages/policy-engine/README.md#controlled-action-contract-tales-actions-v1), [approval boundary](HUMAN_APPROVAL_GATE.md), and [security invariants](SECURITY.md). This implementation remains local working-tree review material on the public v0.1.0 source baseline: no commit, publication, release, package version change, final archive, deployment or site integration is implied. Profile/schema versioning is independent of package release versioning.
+See the [package contract and examples](packages/policy-engine/README.md#controlled-action-contract-tales-actions-v1), [approval boundary](HUMAN_APPROVAL_GATE.md), and [security invariants](SECURITY.md). The current release candidate is unreleased v0.2.0, prepared locally from the public v0.1.0 source baseline and the reviewed Action Profile checkpoint. No public v0.2.0 release, npm publication, final archive, deployment or site integration has occurred. The action profile contract remains tales-actions-v1, independent of package release versioning. See the [v0.2.0 release-candidate note](docs/releases/v0.2.0.md).

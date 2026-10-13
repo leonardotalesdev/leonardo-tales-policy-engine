@@ -1,6 +1,6 @@
 {
   "name": "@leonardo-tales/policy-engine",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Experimental, local-only policy evaluation without action execution.",

@@ -49,7 +49,7 @@ The approved private security reporting channel is [leonardo2047@proton.me](mail
 
 ## Controlled action contract: tales-actions-v1
 
-The separate `evaluateActionPolicy()` API is local, unreleased review work on the public v0.1.0 baseline. `ACTION_PROFILE_VERSION` and the immutable `REGISTERED_ACTION_PROFILES` are exported from the package entry point. The contract version is independent of the unchanged package version. This API does not call, replace or reinterpret `evaluatePolicy()`; all its existing v0.1 restrictions still apply.
+The separate `evaluateActionPolicy()` API is part of the current unreleased v0.2.0 release candidate, prepared locally from the public v0.1.0 baseline and the reviewed Action Profile checkpoint. `ACTION_PROFILE_VERSION` and the immutable `REGISTERED_ACTION_PROFILES` are exported from the package entry point. The package version is 0.2.0; the independent action profile contract remains tales-actions-v1. This API does not call, replace or reinterpret `evaluatePolicy()`; all its existing v0.1 restrictions still apply.
 
 ### Runtime facts and validation
 
@@ -162,4 +162,4 @@ Neither this contract nor a prior policy output creates standing production or e
 
 The original tests stay unchanged; dedicated `src/action-policy.test.ts` covers registry, all common/profile gates, exact approval binding, reconciliation limits, malformed runtime inputs, descriptor/getter/proxy cases, frozen/mutated records, result isolation and generic v0.1 regressions. Required commands remain the local-development commands above. This implementation is also locally checked on Node.js 24.16.0 / pnpm 11.9.0; this adds no general platform-support or production-certification claim.
 
-Build output imports `dist/action-policy.js` from `dist/index.js`; the package file allowlist includes that file and its declaration. Generated dist remains ignored. No final .tgz, package publication, GitHub release, version bump or site integration is part of this task.
+Build output imports `dist/action-policy.js` from `dist/index.js`; the package file allowlist includes that file and its declaration. Generated dist remains ignored. The v0.2.0 release candidate has not been publicly released. No final .tgz, package publication, GitHub release or site integration is authorized by this release-candidate metadata task.
