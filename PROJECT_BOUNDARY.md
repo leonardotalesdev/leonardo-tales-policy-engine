@@ -17,3 +17,13 @@ Private Core history, Core Console, Science, Vault, Dev, internal decisions and 
 Read, Draft, Suggest, Modify, Execute, Publish, Deploy, and Delete remain distinct actions. A role description, tool capability, package output, or local record does not grant authority. Any repository change requires an applicable human-approved task and scope. Publication, deployment, external communication, deletion, and high-impact action require their own approvals and applicable reviews. See [Permissions](PERMISSIONS.md) and [Human Approval Gate](HUMAN_APPROVAL_GATE.md).
 
 If scope, rights, security, or approval is uncertain, stop the affected action, preserve the state, and seek human review. This repository grants no runtime authority or access to private repositories, systems, or data.
+
+## Separate controlled action evaluation surface
+
+The reviewed implementation scope adds `packages/policy-engine/src/action-policy.ts` and a separate exported `evaluateActionPolicy()`. The `tales-actions-v1` schema registers only `telegram.notify_pending_action`, `calendar.create_meeting`, and `calendar.read_meeting_for_reconciliation`. This is an explicit, narrow evaluation surface; it neither routes nor relaxes the generic `evaluatePolicy()` v0.1 boundary.
+
+Production is an evaluated caller context, not a deployment status or authority grant. Local/preview inputs, disabled runtime, unknown version/profile, unauthorized target, payload secrets, high-stakes data or non-minimized real user data block. All evaluations require audit. The notification evaluates a separately human-approved, limited scope; meeting creation requires exact action-specific approval; reconciliation is limited to a previously authorized ambiguous execution and its bound deterministic event.
+
+There is no executor, network client, OAuth, credential access, authentication, cryptographic verification, Redis, memory service, model, or runtime enforcement in this package. It consumes only typed facts, opaque aliases and a hash, never personal action contents. The caller owns those mechanisms and must re-evaluate current facts before its authorized executor acts. An `allow` result supplies no standing, cross-project, arbitrary external-tool or secret authority.
+
+This local implementation task does not authorize release, integration into hakandemirci.tech, or production operations. The Constitution remains unchanged. See the [package contract](packages/policy-engine/README.md#controlled-action-contract-tales-actions-v1).

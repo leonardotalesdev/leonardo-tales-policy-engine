@@ -16,3 +16,11 @@ Meaningful use of authority must leave an audit trail. At minimum, the event cla
 High-impact permission use must also leave a trace under LT-NC-023. A proportionate, reviewable record can explain what happened, its scope and evidence, and what remains unapproved; this guidance does not create a new mandatory field schema. Records must not contain secrets or unnecessary personal data. An audit record is evidence of a decision, not authority to act.
 
 Repository files and Git history are editable local evidence. This document does not claim immutable logs, independent timestamps, cryptographic identity verification, complete activity capture, external audit infrastructure, or compliance certification. Additional audit conventions require a separate decision. See [Human Approval Gate](HUMAN_APPROVAL_GATE.md) and [Security](SECURITY.md).
+
+## Controlled action evaluation review record
+
+The current scoped local implementation introduces a separate `tales-actions-v1` evaluation surface with exactly three profiles: pending-action Telegram notification, Calendar meeting creation, and bound-event execution reconciliation. It leaves generic v0.1 behavior and the canonical Constitution unchanged. Source, dedicated synthetic tests and narrow governance updates are working-tree review material; this record does not claim a commit, package release, runtime implementation, site integration, deployment or external action occurred.
+
+`evaluateActionPolicy()` sets `auditRequired=true` for every allow, requires-approval and block result, including invalid input. Successful/pending evaluations are high risk; blocks are restricted. It returns static reasons, violation IDs, approval requirements, the canonical profile version, a validated profile (or null for malformed input), `evaluationOnly=true` and boundary notes. It neither stores audit events nor verifies approvals.
+
+The caller must persist proportionate, minimized evidence of proposal/revision binding, policy decision, approval/denial/revocation, permitted notification, execution attempt/outcome and reconciliation, within its own approved audit design. Do not log raw policy/action payloads, secrets or unnecessary personal data. Correlate runtime-owned opaque IDs/hash only under its retention/access policy. Re-evaluation and idempotent execution must not be inferred from an old audit record.

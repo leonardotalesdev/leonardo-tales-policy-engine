@@ -520,3 +520,20 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyEvaluationRe
     ],
   }
 }
+
+export {
+  ACTION_PROFILE_VERSION,
+  REGISTERED_ACTION_PROFILES,
+  evaluateActionPolicy,
+} from './action-policy.js'
+export type {
+  ActionProfile,
+  ActionEnvironment,
+  ActionExecutionState,
+  ActionPolicyBaseInput,
+  ActionApprovalContext,
+  PendingActionNotificationFacts,
+  MeetingReconciliationFacts,
+  ActionPolicyEvaluationInput,
+  ActionPolicyEvaluationResult,
+} from './action-policy.js'

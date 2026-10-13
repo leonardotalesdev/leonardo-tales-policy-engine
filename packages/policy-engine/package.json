@@ -16,6 +16,8 @@
   "files": [
     "dist/index.js",
     "dist/index.d.ts",
+    "dist/action-policy.js",
+    "dist/action-policy.d.ts",
     "README.md",
     "LICENSE"
   ],
