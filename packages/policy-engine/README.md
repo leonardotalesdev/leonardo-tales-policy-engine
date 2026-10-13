@@ -1,6 +1,6 @@
 # @leonardo-tales/policy-engine
 
-An experimental, narrow helper for evaluating proposed actions. It returns a policy decision without side effects or action execution. This package has no public registry release. This package is maintained in the standalone policy-engine source repository.
+An experimental, narrow helper for evaluating proposed actions. It returns a policy decision without side effects or action execution. npm registry publication is not provided. This package is maintained in the standalone policy-engine source repository.
 
 ## Evaluate a proposal
 
@@ -43,13 +43,13 @@ The local proof environment is Node.js 22.22.2. Broader Node version support has
 
 ## License and reporting boundary
 
-Apache License 2.0 applies to this narrow policy-engine package distribution. The private Leonardo Tales Core repository and its history are outside that code-license scope. Hakan Demirci's rights-controlled original contributions to root governance and community documentation in the initial 25-file repository source snapshot are licensed under CC BY 4.0 within the separate scope of the [repository license map](https://github.com/leonardotalesdev/leonardo-tales-policy-engine/blob/main/LICENSE.md). Leonardo Tales trademarks and logos are not licensed by the package license; use of the name for package identity does not grant general branding rights.
+Apache License 2.0 applies to this narrow policy-engine package distribution. The private Leonardo Tales Core repository and its history are outside that code-license scope. Hakan Demirci's rights-controlled original contributions to root governance and community documentation in the initial 25-file repository source snapshot are licensed under CC BY 4.0 within the separate scope of the [repository license map](https://github.com/leonardotalesdev/leonardo-tales-policy-engine/blob/main/LICENSE.md). The map separately covers his rights-controlled v0.2.0 governance/release documentation additions and modifications; it does not change the Apache-2.0 license of this package or its README. Leonardo Tales trademarks and logos are not licensed by the package license; use of the name for package identity does not grant general branding rights.
 
 The approved private security reporting channel is [leonardo2047@proton.me](mailto:leonardo2047@proton.me). The founder reports a successful delivery/reply test. Hakan is the sole maintainer. There is no response-time commitment. Do not put vulnerability details, secrets, or real user data in a public issue. Further publication and releases require separate human approval.
 
 ## Controlled action contract: tales-actions-v1
 
-The separate `evaluateActionPolicy()` API is part of the current unreleased v0.2.0 release candidate, prepared locally from the public v0.1.0 baseline and the reviewed Action Profile checkpoint. `ACTION_PROFILE_VERSION` and the immutable `REGISTERED_ACTION_PROFILES` are exported from the package entry point. The package version is 0.2.0; the independent action profile contract remains tales-actions-v1. This API does not call, replace or reinterpret `evaluatePolicy()`; all its existing v0.1 restrictions still apply.
+The separate `evaluateActionPolicy()` API is included in package version 0.2.0 as an additive, evaluation-only surface. `ACTION_PROFILE_VERSION` and the immutable `REGISTERED_ACTION_PROFILES` are exported from the package entry point. The package version is 0.2.0; the independent action profile contract remains tales-actions-v1. This API does not call, replace or reinterpret `evaluatePolicy()`; all its existing v0.1 restrictions still apply.
 
 ### Runtime facts and validation
 
@@ -162,4 +162,4 @@ Neither this contract nor a prior policy output creates standing production or e
 
 The original tests stay unchanged; dedicated `src/action-policy.test.ts` covers registry, all common/profile gates, exact approval binding, reconciliation limits, malformed runtime inputs, descriptor/getter/proxy cases, frozen/mutated records, result isolation and generic v0.1 regressions. Required commands remain the local-development commands above. This implementation is also locally checked on Node.js 24.16.0 / pnpm 11.9.0; this adds no general platform-support or production-certification claim.
 
-Build output imports `dist/action-policy.js` from `dist/index.js`; the package file allowlist includes that file and its declaration. Generated dist remains ignored. The v0.2.0 release candidate has not been publicly released. No final .tgz, package publication, GitHub release or site integration is authorized by this release-candidate metadata task.
+Build output imports `dist/action-policy.js` from `dist/index.js`; the package file allowlist includes that file and its declaration. Generated dist remains ignored. When separately authorized, package version 0.2.0 can be distributed as an approved GitHub Release artifact. Release availability is represented by the repository's Git tag and GitHub Release metadata; this README does not prove publication. npm registry publication and production deployment are not provided. Runtime integration and external execution remain the caller's separately governed responsibilities.
