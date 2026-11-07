@@ -2,6 +2,143 @@
 
 An experimental, narrow helper for evaluating proposed actions. It returns a policy decision without side effects or action execution. npm registry publication is not provided. This package is maintained in the standalone policy-engine source repository.
 
+## Try the published release (no source build)
+
+Use the existing [v0.2.0 GitHub Release](https://github.com/leonardotalesdev/leonardo-tales-policy-engine/releases/tag/v0.2.0) package, not an npm registry package or GitHub's generated source archive. No API key, live service, TypeScript compiler, Git or pnpm installation is needed for this example.
+
+### 1. Check Node.js and npm
+
+If Node.js is missing, install Node.js 24 from the [official Node.js downloads](https://nodejs.org/en/download), then reopen your terminal. npm is included with the standard Node.js installer. Check `node --version` and `npm --version`; on Windows PowerShell, use `npm.cmd --version`.
+
+The POSIX walkthrough and demo were verified on Linux with Node.js **24.22.1** and npm **11.9.0** on 2026-11-07. The PowerShell instructions below have been reviewed but **not run on Windows**. Other platforms and versions were not tested by this walkthrough.
+
+### 2. Download, verify and install
+
+Use a directory where `policy-engine-demo` does not already exist. Choose **one** installation block below. Both leave your terminal in the original directory, with the package installed under `policy-engine-demo`.
+
+The download is pinned to v0.2.0 and checked against its published SHA-256. Installation is offline after the download, with lifecycle scripts disabled. The checksum identifies the artifact; it is not a security certification.
+
+**POSIX shell (Linux; requires `curl`):**
+
+```sh
+(
+set -eu
+mkdir policy-engine-demo
+cd policy-engine-demo
+
+curl --fail --location --proto '=https' \
+  --output leonardo-tales-policy-engine-0.2.0.tgz \
+  https://github.com/leonardotalesdev/leonardo-tales-policy-engine/releases/download/v0.2.0/leonardo-tales-policy-engine-0.2.0.tgz
+
+node --input-type=module <<'CHECK'
+import { readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+
+const bytes = readFileSync('leonardo-tales-policy-engine-0.2.0.tgz')
+const actual = createHash('sha256').update(bytes).digest('hex')
+const expected = 'e921e86de913da7d6fcd523039bee192f2876c1650b7ef33368e6a40850ec597'
+if (actual !== expected) throw new Error('Release artifact checksum mismatch')
+CHECK
+
+printf '%s\n' '{"private":true,"type":"module"}' > package.json
+npm install --offline --ignore-scripts --no-audit --no-fund \
+  ./leonardo-tales-policy-engine-0.2.0.tgz
+)
+```
+
+**Windows PowerShell (Windows verification pending):**
+
+Use `npm.cmd` rather than `npm.ps1`; do not change PowerShell execution policy for this example. The explicit native-command exit checks also work with Windows PowerShell 5.1.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $demoDir = Join-Path (Get-Location).Path 'policy-engine-demo'
+    if (Test-Path -LiteralPath $demoDir) {
+        throw 'policy-engine-demo already exists. Choose a fresh location.'
+    }
+    New-Item -ItemType Directory -Path $demoDir | Out-Null
+    Push-Location -LiteralPath $demoDir
+    try {
+        $artifact = 'leonardo-tales-policy-engine-0.2.0.tgz'
+        $url = 'https://github.com/leonardotalesdev/leonardo-tales-policy-engine/releases/download/v0.2.0/' + $artifact
+        Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $artifact
+        $expected = 'e921e86de913da7d6fcd523039bee192f2876c1650b7ef33368e6a40850ec597'
+        if ((Get-FileHash -Algorithm SHA256 -LiteralPath $artifact).Hash -ne $expected) {
+            throw 'Release artifact checksum mismatch'
+        }
+        node -e "require('node:fs').writeFileSync('package.json', JSON.stringify({private:true,type:'module'}))"
+        if ($LASTEXITCODE -ne 0) { throw 'Could not create package.json' }
+        npm.cmd install --offline --ignore-scripts --no-audit --no-fund .\leonardo-tales-policy-engine-0.2.0.tgz
+        if ($LASTEXITCODE -ne 0) { throw 'Package installation failed' }
+    }
+    finally {
+        Pop-Location
+    }
+}
+```
+
+### 3. Run three synthetic proposals
+
+Save this code as `policy-engine-demo/demo-policy.mjs` using your text editor. On Windows, keep the exact `.mjs` extension, not `.mjs.txt`.
+
+```js
+import { evaluatePolicy } from '@leonardo-tales/policy-engine'
+
+// Synthetic policy facts only. This script does not perform the proposed actions.
+const localReview = {
+  subjectType: 'tool-action',
+  title: 'Draft a local review',
+  description: 'Evaluate a synthetic proposal without executing it.',
+  requestedAction: 'draft-local-review',
+  permissionTier: 1,
+  riskHints: ['low'],
+  involvesSecrets: false,
+  involvesProduction: false,
+  involvesExternalIntegration: false,
+  involvesRealUserData: false,
+  involvesFinancialOrLegalOrHealthData: false,
+  proposesCommitOrPush: false,
+  proposesDeployment: false,
+  proposesPublicClaim: false,
+  humanApprovalPresent: false,
+}
+
+const cases = [
+  ['local-review', localReview],
+  ['commit-without-approval', { ...localReview, proposesCommitOrPush: true }],
+  ['secret-material', { ...localReview, involvesSecrets: true, humanApprovalPresent: true }],
+]
+
+for (const [scenario, input] of cases) {
+  const result = evaluatePolicy(input)
+  console.log(JSON.stringify({
+    scenario,
+    decision: result.decision,
+    riskLevel: result.riskLevel,
+    auditRequired: result.auditRequired,
+  }))
+}
+```
+
+From the original directory, run the same command on either platform:
+
+```sh
+node ./policy-engine-demo/demo-policy.mjs
+```
+
+Expected output, captured from the Linux run of the published package:
+
+```jsonl
+{"scenario":"local-review","decision":"allow","riskLevel":"low","auditRequired":false}
+{"scenario":"commit-without-approval","decision":"requires-approval","riskLevel":"medium","auditRequired":true}
+{"scenario":"secret-material","decision":"block","riskLevel":"restricted","auditRequired":true}
+```
+
+No review file, commit, secret access or external action is performed by the demo. `auditRequired` is an instruction to the caller, not evidence that an audit event was saved.
+
+The application must establish trusted facts and enforce filesystem/tool permissions separately. Changing `requestedAction` text or adding a path/handler field does not create a new policy check. A supplied approval boolean is not verified human authorization. The independent action-profile API and its three fixed profiles are documented [below](#controlled-action-contract-tales-actions-v1); this quickstart does not add or relax a profile.
+
 ## Evaluate a proposal
 
 ```js

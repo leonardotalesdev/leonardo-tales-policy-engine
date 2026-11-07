@@ -1,5 +1,21 @@
 # Leonardo Tales Policy Engine
 
+**Evaluate a proposed agent action as `allow`, `requires-approval`, or `block`, using explicit facts supplied by your application.**
+
+For example, the generic API can distinguish these synthetic proposals:
+
+| Proposal | Decision |
+| --- | --- |
+| Draft a low-risk local review | `allow` |
+| Propose a commit without human approval | `requires-approval` |
+| Handle secret material, even with approval asserted | `block` |
+
+[Try the published package: install, run, see three results](packages/policy-engine/README.md#try-the-published-release-no-source-build) · [Full API contract](packages/policy-engine/README.md) · [v0.2.0 release](https://github.com/leonardotalesdev/leonardo-tales-policy-engine/releases/tag/v0.2.0)
+
+This experimental TypeScript package provides fixed evaluation contracts, not a configurable policy language. Use it when those constraints fit your application; consider [OPA](https://www.openpolicyagent.org/docs/agent-tool-calling) or [Cedar](https://docs.cedarpolicy.com/auth/authorization.html) when you need broader policy modeling. No comparative security or performance advantage is claimed.
+
+**A decision is not execution authority.** Your application must verify the facts, enforce its own permissions and perform any separately authorized action. This package does not authenticate a person, execute a tool or save an audit record.
+
 This is a narrow, fresh-history source repository for `@leonardo-tales/policy-engine`. It contains a policy-evaluation package and a limited governance and community surface; it is not the complete Leonardo Tales system.
 
 The [Leonardo Tales Constitution v1.1.1](LEONARDO_TALES_CONSTITUTION.md) is the canonical, normative Turkish text for this repository. These English repository documents describe the package boundary and do not amend the Constitution. Any future English translation would initially be non-normative unless separately ratified. References in the canonical text to internal or historical governance material do not make that material part of this repository or available to readers.
