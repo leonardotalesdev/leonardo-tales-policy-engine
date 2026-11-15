@@ -49,3 +49,21 @@ All profiles require production context, enabled runtime, an authorized target, 
 **This is pure evaluation, not a runtime integration or permission grant.** The caller must establish trusted facts and separately enforce authentication, exact approval verification, OAuth, managed credentials, idempotency, state transitions, execution and audit persistence. Model/visitor assertions are not trusted policy facts. Managed executor credentials stay outside the policy payload and are not read by this package.
 
 See the [package contract and examples](packages/policy-engine/README.md#controlled-action-contract-tales-actions-v1), [approval boundary](HUMAN_APPROVAL_GATE.md), and [security invariants](SECURITY.md). The action profile contract remains tales-actions-v1, independent of package release versioning. GitHub source, tags and Release assets are distinct from npm registry publication. GitHub Releases are the approved package-artifact distribution channel when separately authorized; release availability is represented by the repository's Git tag and GitHub Release metadata, not by this README. npm registry publication and production deployment are not provided, and this package does not implement site integration. See the [v0.2.0 release contents and artifact provenance requirements](docs/releases/v0.2.0.md).
+
+## Verified reference integration
+
+A separate Integration Lab has exercised the `tales-actions-v1` Calendar
+profiles through a bounded real Google Calendar runtime.
+
+The reference experiment validated exact human approval, deterministic
+external identity, real Calendar execution, duplicate handling, crash-window
+reconciliation, persistent authoritative state, terminal replay prevention,
+and single-host multi-process execution coordination.
+
+These results do **not** move OAuth, credentials, execution, persistence or
+runtime authority into this package. Policy Engine remains a pure evaluation
+component, and `allow` remains an evaluation result rather than permission to
+execute.
+
+See [Verified Reference Integration — Integration Lab v0.1](docs/VERIFIED_INTEGRATION_V0.1.md)
+for the tested properties, observed results and explicit limitations.
