@@ -1,7 +1,6 @@
 {
   "name": "@leonardo-tales/policy-engine",
-  "version": "0.2.0",
-  "private": true,
+  "version": "0.2.1",
   "type": "module",
   "description": "Experimental, local-only policy evaluation without action execution.",
   "license": "Apache-2.0",
@@ -26,5 +25,15 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "build": "tsc -p tsconfig.build.json"
+  },
+  "author": "Hakan Demirci",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonardotalesdev/leonardo-tales-policy-engine.git",
+    "directory": "packages/policy-engine"
+  },
+  "homepage": "https://github.com/leonardotalesdev/leonardo-tales-policy-engine#readme",
+  "publishConfig": {
+    "access": "public"
   }
 }
