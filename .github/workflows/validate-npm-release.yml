@@ -1,0 +1,33 @@
+name: Validate npm release
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.1"
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.9.0 --activate
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Test
+        run: pnpm --filter @leonardo-tales/policy-engine test
+      - name: Typecheck
+        run: pnpm --filter @leonardo-tales/policy-engine typecheck
+      - name: Build
+        run: pnpm --filter @leonardo-tales/policy-engine build
+      - name: Inspect package
+        working-directory: packages/policy-engine
+        run: npm pack --dry-run
