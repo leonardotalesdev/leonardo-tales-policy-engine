@@ -12,6 +12,10 @@ const subjectTypes = [
   'memory-action',
 ] as const
 const permissionTiers = [0, 1, 2, 3, 4, 5] as const
+const MAX_TITLE_LENGTH = 256
+const MAX_DESCRIPTION_LENGTH = 4096
+const MAX_REQUESTED_ACTION_LENGTH = 1024
+const MAX_RISK_HINTS = 32
 
 export type PolicyRiskLevel = (typeof riskLevels)[number]
 export type PolicySubjectType = (typeof subjectTypes)[number]
@@ -109,9 +113,9 @@ function validatePolicyInput(input: unknown): PolicyEvaluationInput | null {
 
     if (
       !isAllowedValue(subjectTypes, subjectType) ||
-      typeof title !== 'string' ||
-      typeof description !== 'string' ||
-      typeof requestedAction !== 'string' ||
+      typeof title !== 'string' || title.length > MAX_TITLE_LENGTH ||
+      typeof description !== 'string' || description.length > MAX_DESCRIPTION_LENGTH ||
+      typeof requestedAction !== 'string' || requestedAction.length > MAX_REQUESTED_ACTION_LENGTH ||
       !isAllowedValue(permissionTiers, permissionTier) ||
       !Array.isArray(riskHints) ||
       !hasBooleanFields(values)
@@ -119,13 +123,13 @@ function validatePolicyInput(input: unknown): PolicyEvaluationInput | null {
       return null
     }
 
-    const validatedRiskHints: PolicyRiskLevel[] = []
     const length = Object.getOwnPropertyDescriptor(riskHints, 'length')?.value
 
-    if (typeof length !== 'number' || !Number.isSafeInteger(length) || length < 0) {
+    if (typeof length !== 'number' || !Number.isSafeInteger(length) || length < 0 || length > MAX_RISK_HINTS) {
       return null
     }
 
+    const validatedRiskHints: PolicyRiskLevel[] = []
     for (let index = 0; index < length; index += 1) {
       const descriptor = Object.getOwnPropertyDescriptor(riskHints, String(index))
 
@@ -224,15 +228,15 @@ const policyRules: PolicyRule[] = [
   },
 ]
 
-export const corePolicyRules = policyRules
+export const corePolicyRules = Object.freeze(policyRules.map((rule) => Object.freeze(rule)))
 
-export const policyEngineBoundaryNotes = [
+export const policyEngineBoundaryNotes = Object.freeze([
   'Policy Engine evaluates only. It does not execute actions.',
   'No autonomous execution is introduced.',
   'Human authority remains the final execution boundary.',
   'Production, secrets, real user data, high-stakes data, and external integrations remain closed in v0.1.',
   'Commit, push, deployment, release, and public claim actions remain human-controlled.',
-]
+])
 
 function maxRiskLevel(levels: PolicyRiskLevel[]) {
   return levels.reduce<PolicyRiskLevel>((current, candidate) =>
@@ -503,7 +507,7 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyEvaluationRe
   }
 
   reasons.push(
-    `Subject ${input.subjectType} requested ${input.requestedAction}.`,
+    `Subject type: ${input.subjectType}.`,
     `Policy Engine v0.1 returned ${decision}; it did not execute the proposal.`,
   )
 
@@ -514,10 +518,7 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyEvaluationRe
     violations,
     approvalRequirements,
     auditRequired: riskLevel !== 'low',
-    boundaryNotes: [
-      ...policyEngineBoundaryNotes,
-      `Evaluated subject: ${input.title || 'Untitled proposal'}.`,
-    ],
+    boundaryNotes: [...policyEngineBoundaryNotes],
   }
 }
 

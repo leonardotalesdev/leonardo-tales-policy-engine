@@ -26,6 +26,8 @@ The [Constitutional Alignment Test](CONSTITUTIONAL_ALIGNMENT_TEST.md) reproduces
 
 The generic `evaluatePolicy()` API evaluates explicit caller-supplied policy fields and returns a typed result. Invalid runtime input is rejected with a deterministic `block / restricted` result. `requestedAction` is descriptive; the package does not classify natural language. The output is a local decision aid, not a verified permission grant or action executor. Its `humanApprovalPresent` field is a supplied fact, not proof of identity or approval.
 
+The PE-BOUNDS source limits generic descriptive text and risk hints, omits caller free text from diagnostics, and freezes exported diagnostic metadata. Callers own fact provenance, request-size limits, and execution controls. See the [generic evaluation bounds](packages/policy-engine/README.md#generic-evaluation-bounds) for the limits and compatibility details.
+
 Leonardo Tales has broader constitutional and research aspirations. This package does **not** provide AGI, consciousness, an autonomous civilization, production certification, universal runtime constitutional enforcement, or autonomous high-impact authority. It does not control private Core systems, Dev, Science, or Vault. The [Project Boundary](PROJECT_BOUNDARY.md), [Permissions](PERMISSIONS.md), and [Human Approval Gate](HUMAN_APPROVAL_GATE.md) explain the limits.
 
 ## License and reporting

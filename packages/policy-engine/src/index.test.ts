@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  corePolicyRules,
   evaluatePolicy,
   policyEngineBoundaryNotes,
   type PolicyEvaluationInput,
@@ -563,5 +564,158 @@ describe('policy engine runtime input boundary', () => {
       humanApprovalPresent: true,
     })
     expect(evaluatePolicy(input)).toEqual(evaluatePolicy(input))
+  })
+})
+
+describe('bounded generic policy evaluation', () => {
+  const textLimits = [
+    ['title', 256],
+    ['description', 4096],
+    ['requestedAction', 1024],
+  ] as const
+
+  describe.each(textLimits)('%s limit', (field, limit) => {
+    it('uses the normal approval gate below and exactly at the limit', () => {
+      const base = createPolicyInput({ proposesCommitOrPush: true })
+      const expected = evaluatePolicy(base)
+      expect(expected.decision).toBe('requires-approval')
+      for (const length of [limit - 1, limit]) {
+        expect(evaluatePolicy({ ...base, [field]: 'a'.repeat(length) })).toEqual(expected)
+      }
+    })
+
+    it('rejects overflow without running policy rules', () => {
+      const base = createPolicyInput({ involvesProduction: true, humanApprovalPresent: true })
+      expect(evaluatePolicy({ ...base, [field]: 'a'.repeat(limit + 1) })).toEqual(invalidResult)
+    })
+
+    it('counts UTF-16 code units, including both halves of an astral character', () => {
+      const exact = '💡'.repeat(limit / 2)
+      expect(evaluatePolicy(createPolicyInput({ [field]: exact })).decision).toBe('allow')
+      expect(evaluatePolicy(createPolicyInput({ [field]: exact + 'x' }))).toEqual(invalidResult)
+      const decomposed = 'e\u0301'.repeat(limit / 2) + 'x'
+      expect(evaluatePolicy(createPolicyInput({ [field]: decomposed }))).toEqual(invalidResult)
+    })
+  })
+
+  it.each([31, 32])('uses every accepted hint in a list of %i entries', (length) => {
+    const hints: PolicyEvaluationInput['riskHints'] = Array(length).fill('low')
+    hints[length - 1] = 'high'
+    const expected = evaluatePolicy(createPolicyInput({ riskHints: ['high'] }))
+    expect(expected.decision).toBe('requires-approval')
+    expect(evaluatePolicy(createPolicyInput({ riskHints: hints }))).toEqual(expected)
+    expect(evaluatePolicy(createPolicyInput({ riskHints: hints.reverse() }))).toEqual(expected)
+  })
+
+  it('rejects oversized strings and collections before inspecting hint indices', () => {
+    function checkEarlyRejection(length: number, overrides: Partial<PolicyEvaluationInput>) {
+      const inspected: PropertyKey[] = []
+      const hints = new Proxy<PolicyEvaluationInput['riskHints']>(Array(length).fill('low'), {
+        ownKeys(target) {
+          inspected.push('ownKeys')
+          return Reflect.ownKeys(target)
+        },
+        getOwnPropertyDescriptor(target, property) {
+          inspected.push(property)
+          return Reflect.getOwnPropertyDescriptor(target, property)
+        },
+        get(target, property, receiver) {
+          inspected.push(property)
+          return Reflect.get(target, property, receiver)
+        },
+      })
+      expect(evaluatePolicy(createPolicyInput({ ...overrides, riskHints: hints }))).toEqual(invalidResult)
+      expect(inspected.filter((key) => key !== 'length')).toEqual([])
+    }
+    checkEarlyRejection(33, {})
+    for (const [field, limit] of textLimits) {
+      checkEarlyRejection(32, { [field]: 'a'.repeat(limit + 1) })
+    }
+  })
+
+  it('rejects a malformed final hint after a restricted hint at the inclusive limit', () => {
+    const hints: unknown[] = Array(32).fill('low')
+    hints[0] = 'restricted'
+    hints[31] = 'invalid'
+    expect(evaluateRuntimeInput({ ...createPolicyInput(), riskHints: hints })).toEqual(invalidResult)
+  })
+
+  const diagnosticCases = [
+    ['allow', {}, 'allow'],
+    ['approval gate', { proposesCommitOrPush: true }, 'requires-approval'],
+    ['restricted fact', { involvesProduction: true, humanApprovalPresent: true }, 'block'],
+    ['invalid input', { riskHints: ['invalid'] }, 'block'],
+  ] as const
+
+  it.each(diagnosticCases)('omits free text and control characters for %s', (_, facts, decision) => {
+    const base = { ...createPolicyInput(), ...facts }
+    const output = evaluateRuntimeInput({
+      ...base,
+      title: 'TITLE_MARKER\r',
+      description: 'DESCRIPTION_MARKER\n',
+      requestedAction: 'ACTION_MARKER\u001b',
+    })
+    expect(output.decision).toBe(decision)
+    expect(output).toEqual(evaluateRuntimeInput(base))
+    const serialized = JSON.stringify(output)
+    for (const token of ['TITLE_MARKER', 'DESCRIPTION_MARKER', 'ACTION_MARKER', '\\r', '\\n', '\\u001b']) {
+      expect(serialized).not.toContain(token)
+    }
+  })
+
+  it('exposes frozen, readonly metadata arrays and rules', () => {
+    expect(Object.isFrozen(policyEngineBoundaryNotes)).toBe(true)
+    expect(Object.isFrozen(corePolicyRules)).toBe(true)
+    expect(() => {
+      // @ts-expect-error Consumers cannot assign to a public boundary note.
+      policyEngineBoundaryNotes[0] = policyEngineBoundaryNotes[0]
+    }).toThrow(TypeError)
+    expect(() => {
+      // @ts-expect-error Consumers cannot replace an exported rule.
+      corePolicyRules[0] = corePolicyRules[0]
+    }).toThrow(TypeError)
+    for (const rule of corePolicyRules) {
+      expect(Object.isFrozen(rule)).toBe(true)
+      expect(() => {
+        // @ts-expect-error Individual exported rules also have readonly fields.
+        rule.title = rule.title
+      }).toThrow(TypeError)
+    }
+  })
+
+  it('gives consumers mutable, independent results for valid policy blocks', () => {
+    const input = createPolicyInput({ involvesSecrets: true })
+    const result = evaluatePolicy(input)
+    const original = structuredClone(result)
+    result.decision = 'allow'
+    result.reasons.push('consumer note')
+    result.boundaryNotes.length = 0
+    result.violations[0].title = 'consumer title'
+    result.violations.length = 0
+    result.approvalRequirements[0].satisfied = true
+    result.approvalRequirements.length = 0
+    expect(evaluatePolicy(input)).toEqual(original)
+  })
+
+  it('uses only required own fields on records with cyclic extras and compatible prototypes', () => {
+    const extra: Record<string, unknown> = { humanApprovalPresent: true }
+    extra.self = extra
+    Object.defineProperty(extra, 'ignored', {
+      enumerable: true,
+      get() { throw new Error('nested extra was read') },
+    })
+    const base = createPolicyInput({ proposesCommitOrPush: true })
+    const expected = evaluatePolicy(base)
+    expect(expected.decision).toBe('requires-approval')
+    for (const prototype of [null, { humanApprovalPresent: true }]) {
+      const input = { ...base, extra }
+      Object.setPrototypeOf(input, prototype)
+      const observed = new Proxy(input, {
+        ownKeys() { throw new Error('generic input was enumerated') },
+      })
+      expect(evaluatePolicy(observed)).toEqual(expected)
+      input.title = 'a'.repeat(257)
+      expect(evaluatePolicy(observed)).toEqual(invalidResult)
+    }
   })
 })

@@ -4,10 +4,17 @@
 
 `@leonardo-tales/policy-engine` is an experimental policy evaluator. It returns a result for supplied facts; it does not authenticate approvers, execute actions, enforce operating-system permissions, or provide production security certification. Callers must enforce their own controls and treat input provenance and approval claims as unverified unless separately established.
 
+## Generic input and host resource limits
+
+The unreleased PE-BOUNDS source under review caps the three generic text fields and the risk hint count. Overflow returns the existing audited, restricted `invalid-policy-input` block before policy evaluation. Generic diagnostics contain fixed policy text and validated finite values. Extra generic fields are ignored without reading their values. See the [generic evaluation bounds](packages/policy-engine/README.md#generic-evaluation-bounds).
+
+The limits apply to fields in an already constructed JavaScript object. The host must enforce a separate request-byte limit before parsing. Arbitrary proxy traps can run during inspection without resource isolation. Checking an exact action schema requires listing own keys, so a wide malformed action record can require work proportional to its width. PE-BOUNDS provides no absolute wall-clock or heap guarantee.
+
+The caller owns authentication, fact provenance, cryptographic approval verification, enforcement, execution and audit persistence. A decision or `auditRequired` flag supplies policy information to that caller.
 
 ## Controlled action surface: trust boundary and invariants
 
-The local `packages/policy-engine/src/action-policy.ts` implementation adds pure `evaluateActionPolicy()` evaluation alongside the unchanged generic v0.1 API. Its `tales-actions-v1` registry is fixed to three profiles; no network, OAuth, secret reading, Redis, execution or identity verification is included. This is not a production runtime or security certification.
+The local `packages/policy-engine/src/action-policy.ts` implementation provides pure `evaluateActionPolicy()` evaluation independently of the generic API. Its `tales-actions-v1` registry is fixed to three profiles; no network, OAuth, secret reading, Redis, execution or identity verification is included. This is not a production runtime or security certification.
 
 - The runtime must construct policy facts from its verified state. Never pass model/visitor assertions through as trusted authorization, approval, minimization, recipient or event bindings.
 - Unknown version/profile, malformed fields, local/preview, disabled runtime, unauthorized target, secret material in the evaluated payload, high-stakes data and non-minimized real user data block.

@@ -180,6 +180,27 @@ Decisions are `allow`, `requires-approval`, or `block`. For example, setting `pr
 
 An `allow` result grants no operating-system, tool, deployment, or publication authority. The package performs no action or tool execution, provides no autonomous high-impact authority, and is not production- or security-certified. It must not be used as an approval system by itself.
 
+### Generic evaluation bounds
+
+The following contract applies to the unreleased PE-BOUNDS source under review. The installation instructions above identify v0.2.1.
+
+| Generic input field | Inclusive maximum |
+| --- | ---: |
+| `title` | 256 UTF-16 code units |
+| `description` | 4096 UTF-16 code units |
+| `requestedAction` | 1024 UTF-16 code units |
+| `riskHints` | 32 entries |
+
+`evaluatePolicy()` uses JavaScript string `.length`, so a supplementary Unicode character counts as two code units. Empty and whitespace-only strings are valid within these limits. The evaluator checks text and array lengths before inspecting hint indices. It validates every entry in an accepted array. Empty arrays and duplicate hints are valid, and order has no effect on the resulting risk.
+
+Exceeding any limit rejects the whole input before policy evaluation. The result has decision `block`, risk level `restricted`, a single blocking violation with ID `invalid-policy-input`, an empty `approvalRequirements` array and `auditRequired: true`. The evaluator uses the same fixed reason and boundary notes as for other malformed input.
+
+Required generic fields must be own data properties. The evaluator ignores extra root properties without reading their values, invoking their accessors or traversing nested or cyclic data. The separate `evaluateActionPolicy()` contract requires exact root and profile-specific field sets and rejects extra fields, including symbol keys.
+
+Across all generic decisions, diagnostics use fixed policy text and validated finite values. Caller-supplied titles, descriptions and requested actions are omitted. Use the structured decision, violation IDs and approval requirements when consuming results. The exported `corePolicyRules` and `policyEngineBoundaryNotes` arrays and every exported rule object are frozen at runtime and readonly in TypeScript. Each evaluation returns a fresh result with mutable arrays and records that callers can change independently.
+
+These limits apply to JavaScript field values. Hosts must separately limit request bytes at ingress before parsing and supply trusted records. A JavaScript proxy can run arbitrary code during metadata inspection. Checking the exact action schema can also take work proportional to the number of keys in a malformed record. Neither evaluator guarantees an absolute wall-clock or heap bound.
+
 ## Local development and compatibility
 
 In this standalone workspace, run `pnpm install --frozen-lockfile`, then `pnpm --filter @leonardo-tales/policy-engine test`, `pnpm --filter @leonardo-tales/policy-engine typecheck`, and `pnpm --filter @leonardo-tales/policy-engine build`. Consumers need the build output because the package exports `dist/index.js` and `dist/index.d.ts`.
@@ -305,6 +326,6 @@ Neither this contract nor a prior policy output creates standing production or e
 
 ### Validation scope
 
-The original tests stay unchanged; dedicated `src/action-policy.test.ts` covers registry, all common/profile gates, exact approval binding, reconciliation limits, malformed runtime inputs, descriptor/getter/proxy cases, frozen/mutated records, result isolation and generic v0.1 regressions. Required commands remain the local-development commands above. This implementation is also locally checked on Node.js 24.16.0 / pnpm 11.9.0; this adds no general platform-support or production-certification claim.
+The original controlled action implementation preserved the existing generic tests. Its dedicated `src/action-policy.test.ts` covers registry, all common/profile gates, exact approval binding, reconciliation limits, malformed runtime inputs, descriptor/getter/proxy cases, frozen/mutated records, result isolation and generic v0.1 regressions. Required commands remain the local-development commands above. The controlled action implementation was also checked locally on Node.js 24.16.0 / pnpm 11.9.0. That historical check covers only the environment tested.
 
 Build output imports `dist/action-policy.js` from `dist/index.js`; the package file allowlist includes that file and its declaration. Generated dist remains ignored. The v0.2.0 GitHub Release remains the historical verified artifact. Package v0.2.1 is a publication-metadata patch authorized for public npm distribution; registry availability must be verified on npm. Production deployment is not provided. Runtime integration and external execution remain the caller's separately governed responsibilities.
