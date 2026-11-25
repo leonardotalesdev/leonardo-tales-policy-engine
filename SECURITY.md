@@ -6,7 +6,7 @@
 
 ## Generic input and host resource limits
 
-The unreleased PE-BOUNDS source under review caps the three generic text fields and the risk hint count. Overflow returns the existing audited, restricted `invalid-policy-input` block before policy evaluation. Generic diagnostics contain fixed policy text and validated finite values. Extra generic fields are ignored without reading their values. See the [generic evaluation bounds](packages/policy-engine/README.md#generic-evaluation-bounds).
+Version 0.3.0 includes the accepted PE-BOUNDS limits on the three generic text fields and the risk hint count. Overflow returns the existing audited, restricted `invalid-policy-input` block before policy evaluation. Generic diagnostics contain fixed policy text and validated finite values. Extra generic fields are ignored without reading their values. See the [generic evaluation bounds](packages/policy-engine/README.md#generic-evaluation-bounds).
 
 The limits apply to fields in an already constructed JavaScript object. The host must enforce a separate request-byte limit before parsing. Arbitrary proxy traps can run during inspection without resource isolation. Checking an exact action schema requires listing own keys, so a wide malformed action record can require work proportional to its width. PE-BOUNDS provides no absolute wall-clock or heap guarantee.
 

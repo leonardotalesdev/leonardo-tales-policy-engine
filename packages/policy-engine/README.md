@@ -4,11 +4,13 @@ An experimental, narrow helper for evaluating proposed actions. It returns a pol
 
 ## Install from npm
 
+Confirm that the public npm registry lists version 0.3.0 before running this command.
+
 ```sh
-npm install @leonardo-tales/policy-engine@0.2.1
+npm install @leonardo-tales/policy-engine@0.3.0
 ```
 
-Public npm availability must be verified against the registry; this README alone does not prove publication. The API remains evaluation-only and performs no external action.
+The API remains evaluation-only and performs no external action.
 
 ## Historical v0.2.0 GitHub artifact verification
 
@@ -182,7 +184,7 @@ An `allow` result grants no operating-system, tool, deployment, or publication a
 
 ### Generic evaluation bounds
 
-The following contract applies to the unreleased PE-BOUNDS source under review. The installation instructions above identify v0.2.1.
+Version 0.3.0 applies the following limits to `evaluatePolicy()`.
 
 | Generic input field | Inclusive maximum |
 | --- | ---: |
@@ -215,7 +217,7 @@ The approved private security reporting channel is [leonardo2047@proton.me](mail
 
 ## Controlled action contract: tales-actions-v1
 
-The separate `evaluateActionPolicy()` API was introduced in package version 0.2.0 and remains unchanged in v0.2.1 as an additive, evaluation-only surface. `ACTION_PROFILE_VERSION` and the immutable `REGISTERED_ACTION_PROFILES` are exported from the package entry point. The package version is 0.2.1; the independent action profile contract remains tales-actions-v1. This API does not call, replace or reinterpret `evaluatePolicy()`; all its existing v0.1 restrictions still apply.
+Package v0.2.0 introduced `evaluateActionPolicy()` as a separate evaluation-only API. Version 0.3.0 preserves the same three profiles and the independent `tales-actions-v1` contract. The package entry point exports `ACTION_PROFILE_VERSION` and the immutable `REGISTERED_ACTION_PROFILES`. The generic evaluator retains its own policy decisions and restrictions.
 
 ### Runtime facts and validation
 
